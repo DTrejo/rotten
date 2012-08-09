@@ -36,3 +36,12 @@ If you'd like to order by most commits waiting (instead of oldest commit waiting
 ```sh
 $ rotten --mostcommits
 ```
+
+
+## Scoring?
+`Your rotten score is #rotten:13/harvested:37`
+
+Explanation:
+
+  - rotten = # branches you need to merge into prod
+  - harvested: branches already in prod that need to be deleted.

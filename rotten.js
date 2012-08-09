@@ -8,7 +8,7 @@ var optimist =
     .alias('h', 'help')
 
     .alias('r', 'repo')
-    .default('r', '.')
+    .default('r', process.cwd())
     .describe('r', 'the repo youd like to examine for rotting code')
 
     .alias('p', 'prod')
@@ -29,7 +29,7 @@ if (argv.help) {
 }
 
 var repoDir = path.resolve(__dirname, argv.repo)
-var prod = argv.prod;
+var prod = argv.prod
 
 function git(args, cb) {
   return exec('git ' + args, { cwd: repoDir }, cb)
@@ -42,11 +42,14 @@ function main () {
   console.log('Checking that branches are in production branch', prod.green)
   git('branch -r', function (err, stdout) {
     var branches = stdout.split('\n').map(trim).filter(identity)
-    var inprod = [];
-    var notinprod = [];
-    var partiallyinprod = [];
+    var inprod = []
+    var notinprod = []
+    var partiallyinprod = []
 
+    var prodRegex = new RegExp('/'+prod+'$')
     async.forEach(branches, function (branch, cb) {
+      if (prodRegex.test(branch)) return cb() // ignore e.g. origin/master
+
       // git log dt-bsr --not --remotes="*/release" --format="%H | %ae | %ce | %ar | %cr | %ct"
       git('log '+ branch +' --not --remotes="*/' + prod + '" --format="%H | %ae | %ce | %ar | %cr | %ct"', function (err, stdout) {
         var commits = stdout.split('\n').map(trim).filter(identity).map(function (s) {
@@ -88,10 +91,10 @@ function main () {
         console.log('==Congrats, repo is clean of branches already merged into '.green + prod.magenta + '=='.green)
       }
       // partiallyinprod.forEach(function (info) {
-      //   console.log(info.branch.yellow, 'has', info.numincluded, '/', info.numtotal, 'commits in prod');
+      //   console.log(info.branch.yellow, 'has', info.numincluded, '/', info.numtotal, 'commits in prod')
       // })
       if (notinprod.length) {
-        console.log('==Branches waiting to get into prod (or plain rotten). Most oldest/most commits first=='.red);
+        console.log('==Branches waiting to get into prod (or plain rotten). Most oldest/most commits first=='.red)
         if (argv.mostcommits) {
           notinprod.sort(function (a, b) {
             return b.commits.length - a.commits.length
@@ -104,7 +107,7 @@ function main () {
         }
 
         notinprod.forEach(function (info) {
-          var latest = info.commits[0];
+          var latest = info.commits[0]
           console.log('  ' + ('' + info.commits.length).red + ' ' + info.branch.red
             + ' has ' + (info.commits.length + '').red
             + ' commits waiting. Latest commit: Author %s, %s. Committer %s, %s.'
@@ -113,6 +116,12 @@ function main () {
       } else {
         console.log('==Congrats, repo has no remote branches waiting to get into '.green + prod.magenta + '. You are a superstar=='.green)
       }
+
+      console.log('Explanation: rotten = # branches you need to merge into prod')
+      console.log('harvested: branches already in prod that need to be deleted.')
+      console.log('Please tweet your score! (With the #rotten hashtag :)')
+      console.log('  Your rotten score is ' +
+        ('#rotten:' + notinprod.length+'/harvested:'+inprod.length).green)
       process.exit(0)
     })
   })
