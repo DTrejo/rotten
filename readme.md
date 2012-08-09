@@ -13,6 +13,14 @@ $ rotten
 ```
 
 ## Usage
+Simple:
+
+```
+$ cd my-big-git-repo
+$ rotten
+
+Complicated:
+
 ```
 Usage: rotten --repo /path-to-git-repo --prod master
 
