@@ -18,6 +18,7 @@ Simple:
 ```
 $ cd my-big-git-repo
 $ rotten
+```
 
 Complicated:
 
