@@ -1,0 +1,25 @@
+{
+  "author": "David Trejo <david.daniel.trejo@gmail.com> (http://dtrejo.com/)",
+  "name": "rotten",
+  "description": "figure out which branches in your git repository are rotten and haven't been merged into production in WAY too long.",
+  "version": "0.0.0",
+  "homepage": "https://github.com/dtrejo/rotten",
+  "repository": {
+    "url": "git@github.com:DTrejo/rotten.git"
+  },
+  "main": "rotten.js",
+  "dependencies": {
+    "colors": "~0.6.0-1",
+    "async": "~0.1.22",
+    "optimist": "~0.3.4"
+  },
+  "devDependencies": {},
+  "optionalDependencies": {},
+  "engines": {
+    "node": "*"
+  },
+  "preferGlobal": true,
+  "bin": {
+    "rotten": "./rotten.js"
+  }
+}
