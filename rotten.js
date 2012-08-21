@@ -32,6 +32,9 @@ var repoDir = path.resolve(__dirname, argv.repo)
 var prod = argv.prod
 
 function git(args, cb) {
+  // args = '--git-dir ' + repoDir + '/.git ' + args;
+  // console.log('git ' + args);
+  // return exec([ 'git', args ], cb)
   return exec('git ' + args, { cwd: repoDir }, cb)
 }
 function trim (s) { return s.trim() }
@@ -40,18 +43,23 @@ function identity (s) { return s }
 function main () {
   console.log('Running against', repoDir.green)
   console.log('Checking that branches are in production branch', prod.green)
-  git('branch -r', function (err, stdout) {
+  git('branch -r', function (err, stdout, stderr) {
+    if (err) console.log('\n', new Error(err.message).stack)
+
     var branches = stdout.split('\n').map(trim).filter(identity)
     var inprod = []
     var notinprod = []
     var partiallyinprod = []
 
-    var prodRegex = new RegExp('/'+prod+'$')
+    var prodRegex = new RegExp('/' + prod + '$')
+    var dot = 0
     async.forEach(branches, function (branch, cb) {
       if (prodRegex.test(branch)) return cb() // ignore e.g. origin/master
-
+      if (dot++ % 5 === 0) process.stdout.write('.')
       // git log dt-bsr --not --remotes="*/release" --format="%H | %ae | %ce | %ar | %cr | %ct"
-      git('log '+ branch +' --not --remotes="*/' + prod + '" --format="%H | %ae | %ce | %ar | %cr | %ct"', function (err, stdout) {
+      git('log ' + branch + ' --not --remotes="*/' + prod + '" --format="%H | %ae | %ce | %ar | %cr | %ct"', function (err, stdout, stderr) {
+        if (err) console.log('\n', new Error(err.message).stack)
+
         var commits = stdout.split('\n').map(trim).filter(identity).map(function (s) {
           var fields = s.split(' | ')
           return {
@@ -75,6 +83,7 @@ function main () {
         cb()
       })
     }, function (err) {
+      console.log('')
       if (inprod.length) {
         inprod.forEach(function (info) {
           console.log('  ' + info.branch.green + ' all in prod, please delete remote branch')
@@ -126,6 +135,17 @@ function main () {
     })
   })
 }
+
+process.on('uncaughtException', function (err) {
+  if (/spawn Unknown system errno 23/.test(err.message)) {
+    console.log();
+    console.log('ERROR');
+    console.log('Please be sure you\'ve specified a branch that exists.\nI have'
+      + ' reason to believe that the branch ' + prod.red +' does not exist in'
+      + ' this repo.');
+  }
+  process.exit(1)
+})
 
 if (require.main === module) {
   main()
