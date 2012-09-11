@@ -91,8 +91,9 @@ function main () {
         console.log()
         console.log("==Paste the following to delete them all==".red)
         var deleteThese = inprod.map(function (info) {
-          return 'git push origin :' + info.branch.red
-        }).join('; ')
+          var branchName = info.branch.replace(/(.*\/)/, '') // take everything after the slash
+          return 'git push origin :' + branchName.red + '; git branch -D ' + branchName.red + ';'
+        }).join('\n')
         console.log(deleteThese)
         console.log()
         console.log()
