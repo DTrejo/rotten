@@ -44,7 +44,7 @@ function main () {
   console.log('Running against', repoDir.green)
   console.log('Checking that branches are in production branch', prod.green)
   git('branch -r', function (err, stdout, stderr) {
-    handleError(new Error(err.message).stack))
+    if (err) handleError(new Error(err.message).stack)
 
     var branches = stdout.split('\n').map(trim).filter(identity)
     var inprod = []
@@ -79,19 +79,22 @@ function main () {
         cb()
       })
     }, function (err) {
-      handleError(new Error(err.message).stack))
+      if (err) handleError(new Error(err.message).stack)
 
       console.log('')
       if (inprod.length) {
+        inprod = inprod.reverse()
         inprod.forEach(function (info) {
           console.log('  ' + info.branch.green + ' all in prod, please delete remote branch')
         })
         console.log()
         console.log("==Paste the following to delete them all==".red)
-        var deleteThese = inprod.map(function (info) {
-          var branchName = info.branch.replace(/(.*\/)/, '') // take everything after the slash
-          return 'git push origin :' + branchName.red + '; git branch -D ' + branchName.red + ';'
-        }).join('\n')
+        var deleteThese = 
+          inprod.map(function (info) {
+            var branchName = info.branch.replace(/(.*\/)/, '') // take everything after the slash
+            return 'git push origin :' + branchName.red + '; git branch -D ' + branchName.red + ';'
+          })
+          .join('\n')
         console.log(deleteThese)
         console.log()
         console.log()
@@ -133,7 +136,7 @@ function main () {
 }
 
 process.on('uncaughtException', function (err) {
-  handleError(new Error(err.message).stack))
+  if (err) handleError(new Error(err.message).stack)
   process.exit(1)
 })
 
@@ -142,9 +145,8 @@ function handleError(err) {
     console.log('\n', new Error(err.message).stack);
     console.log('ERROR. Please be sure you\'ve specified a branch that exists.\nI have'
       + ' reason to believe that the branch ' + prod.red +' does not exist in'
-      + ' this repo.');
+      + ' this repo.')
   } else {
-    console.log('\n', new Error(err.message).stack);
     console.log('Please report bugs to https://github.com/dtrejo/rotten, thank you.')
   }
 }
