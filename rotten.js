@@ -44,7 +44,7 @@ function main () {
   console.log('Running against', repoDir.green)
   console.log('Checking that branches are in production branch', prod.green)
   git('branch -r', function (err, stdout, stderr) {
-    if (err) console.log('\n', new Error(err.message).stack)
+    handleError(new Error(err.message).stack))
 
     var branches = stdout.split('\n').map(trim).filter(identity)
     var inprod = []
@@ -73,16 +73,14 @@ function main () {
         })
         if (commits.length === 0) {
           inprod.push({ branch: branch, commits: commits })
-        }
-        // else if (commits.length !== commitsInBranch) {
-        //   // TODO partially in master, warn
-        // }
-        else {
+        } else {
           notinprod.push({ branch: branch, commits: commits })
         }
         cb()
       })
     }, function (err) {
+      handleError(new Error(err.message).stack))
+
       console.log('')
       if (inprod.length) {
         inprod.forEach(function (info) {
@@ -100,9 +98,6 @@ function main () {
       } else {
         console.log('==Congrats, repo is clean of branches already merged into '.green + prod.magenta + '=='.green)
       }
-      // partiallyinprod.forEach(function (info) {
-      //   console.log(info.branch.yellow, 'has', info.numincluded, '/', info.numtotal, 'commits in prod')
-      // })
       if (notinprod.length) {
         console.log('==Branches waiting to get into prod (or plain rotten). Most oldest/most commits first=='.red)
         if (argv.mostcommits) {
@@ -138,15 +133,21 @@ function main () {
 }
 
 process.on('uncaughtException', function (err) {
-  if (/spawn Unknown system errno 23/.test(err.message)) {
-    console.log();
-    console.log('ERROR');
-    console.log('Please be sure you\'ve specified a branch that exists.\nI have'
-      + ' reason to believe that the branch ' + prod.red +' does not exist in'
-      + ' this repo.');
-  }
+  handleError(new Error(err.message).stack))
   process.exit(1)
 })
+
+function handleError(err) {
+  if (/spawn Unknown system errno 23/.test(err.message)) {
+    console.log('\n', new Error(err.message).stack);
+    console.log('ERROR. Please be sure you\'ve specified a branch that exists.\nI have'
+      + ' reason to believe that the branch ' + prod.red +' does not exist in'
+      + ' this repo.');
+  } else {
+    console.log('\n', new Error(err.message).stack);
+    console.log('Please report bugs to https://github.com/dtrejo/rotten, thank you.')
+  }
+}
 
 if (require.main === module) {
   main()
