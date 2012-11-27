@@ -17,7 +17,8 @@ var optimist =
 
     .alias('c', 'mostcommits')
     .default('c', false)
-    .describe('c', 'show branches with the most commits first (defaults to showing oldest commits first)')
+    .describe('c', 'show branches with the most commits first (defaults to'
+      + 'showing oldest commits first)')
 
     .usage('Usage: $0 --repo /path-to-git-repo --prod master')
 
@@ -53,14 +54,18 @@ function main () {
 
     var prodRegex = new RegExp('/' + prod + '$')
     var dot = 0
-    async.forEach(branches, function (branch, cb) {
+    async.forEachSeries(branches, function (branch, cb) {
       if (prodRegex.test(branch)) return cb() // ignore e.g. origin/master
       if (dot++ % 5 === 0) process.stdout.write('.')
-      // git log dt-bsr --not --remotes="*/release" --format="%H | %ae | %ce | %ar | %cr | %ct"
-      git('log ' + branch + ' --not --remotes="*/' + prod + '" --format="%H | %ae | %ce | %ar | %cr | %ct"', function (err, stdout, stderr) {
+      // git log dt-bsr --not --remotes="*/release"
+      //  --format="%H | %ae | %ce | %ar | %cr | %ct"
+      git('log ' + branch + ' --not --remotes="*/' + prod
+          + '" --format="%H | %ae | %ce | %ar | %cr | %ct"', onBranch)
+      function onBranch (err, stdout, stderr) {
         if (err) console.log('\n', new Error(err.message).stack)
 
-        var commits = stdout.split('\n').map(trim).filter(identity).map(function (s) {
+        var commits = stdout.split('\n').map(trim).filter(identity)
+        .map(function (s) {
           var fields = s.split(' | ')
           return {
             sha: fields[0]
@@ -85,24 +90,29 @@ function main () {
       if (inprod.length) {
         inprod = inprod.reverse()
         inprod.forEach(function (info) {
-          console.log('  ' + info.branch.green + ' all in prod, please delete remote branch')
+          console.log('  ' + info.branch.green
+            + ' all in prod, please delete remote branch')
         })
         console.log()
         console.log("==Paste the following to delete them all==".red)
-        var deleteThese = 
+        var deleteThese =
           inprod.map(function (info) {
-            var branchName = info.branch.replace(/(.*\/)/, '') // take everything after the slash
-            return 'git push origin :' + branchName.red + '; git branch -D ' + branchName.red + ';'
+            // take everything after the slash
+            var branchName = info.branch.replace(/(.*\/)/, '')
+            return 'git push origin :' + branchName.red + '; git branch -D '
+              + branchName.red + ';'
           })
           .join('\n')
         console.log(deleteThese)
         console.log()
         console.log()
       } else {
-        console.log('==Congrats, repo is clean of branches already merged into '.green + prod.magenta + '=='.green)
+        console.log('==Congrats, repo is clean; all branches already merged'
+          + ' into '.green + prod.magenta + '=='.green)
       }
       if (notinprod.length) {
-        console.log('==Branches waiting to get into prod (or plain rotten). Most oldest/most commits first=='.red)
+        console.log('==Branches waiting to get into prod (or plain rotten).'
+          + ' Most oldest/most commits first=='.red)
         if (argv.mostcommits) {
           notinprod.sort(function (a, b) {
             return b.commits.length - a.commits.length
@@ -110,26 +120,30 @@ function main () {
         } else {
           // oldest first
           notinprod.sort(function (a, b) {
-            return a.commits[0].committertimestamp - b.commits[0].committertimestamp
+            return a.commits[0].committertimestamp
+              - b.commits[0].committertimestamp
           })
         }
 
         notinprod.forEach(function (info) {
           var latest = info.commits[0]
-          console.log('  ' + ('' + info.commits.length).red + ' ' + info.branch.red
-            + ' has ' + (info.commits.length + '').red
-            + ' commits waiting. Latest commit: Author %s, %s. Committer %s, %s.'
-            , latest.author, latest.authordateago, latest.committer.green, latest.committerdateago)
+          console.log('  ' + ('' + info.commits.length).red + ' '
+            + info.branch.red + ': ' + (info.commits.length + '').red
+            + ' commits waiting. Latest commit: Author %s %s. Committer %s %s.'
+            , latest.author, latest.authordateago, latest.committer.green
+            , latest.committerdateago)
         })
       } else {
-        console.log('==Congrats, repo has no remote branches waiting to get into '.green + prod.magenta + '. You are a superstar=='.green)
+        console.log(
+          '==Congrats, repo has no remote branches waiting to get into '.green
+          + prod.magenta + '. You are a superstar=='.green)
       }
 
-      console.log('Explanation: rotten = # branches you need to merge into prod')
-      console.log('harvested: branches already in prod that need to be deleted.')
+      console.log('#rotten is the number of branches you need to merge to prod')
+      console.log('harvested: branches already in prod that need to be deleted')
       console.log('Please tweet your score! (With the #rotten hashtag :)')
-      console.log('  Your rotten score is ' +
-        ('#rotten:' + notinprod.length+'/harvested:'+inprod.length).green)
+      console.log('  Your rotten score is '
+        + ('#rotten:' + notinprod.length + '/harvested:' + inprod.length).green)
       process.exit(0)
     })
   })
@@ -143,11 +157,13 @@ process.on('uncaughtException', function (err) {
 function handleError(err) {
   if (/spawn Unknown system errno 23/.test(err.message)) {
     console.log('\n', new Error(err.message).stack);
-    console.log('ERROR. Please be sure you\'ve specified a branch that exists.\nI have'
-      + ' reason to believe that the branch ' + prod.red +' does not exist in'
-      + ' this repo.')
+    console.log('ERROR. Please be sure you\'ve specified a branch that exists.'
+      + '\nI have reason to believe that the branch ' + prod.red +' does not'
+      + ' exist in this repo.')
   } else {
-    console.log('Please report bugs to https://github.com/dtrejo/rotten, thank you.')
+    console.log('\n', new Error(err.message).stack);
+    console.log('Please report bugs to https://github.com/dtrejo/rotten,'
+      + ' thank you.')
   }
 }
 
