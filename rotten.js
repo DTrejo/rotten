@@ -82,7 +82,7 @@ function main () {
           notinprod.push({ branch: branch, commits: commits })
         }
         cb()
-      })
+      }
     }, function (err) {
       if (err) handleError(new Error(err.message).stack)
 
