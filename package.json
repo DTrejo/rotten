@@ -2,7 +2,7 @@
   "author": "David Trejo <david.daniel.trejo@gmail.com> (http://dtrejo.com/)",
   "name": "rotten",
   "description": "figure out which branches in your git repository are rotten and haven't been merged into production in WAY too long.",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "homepage": "https://github.com/dtrejo/rotten",
   "repository": {
     "url": "git@github.com:DTrejo/rotten.git"
