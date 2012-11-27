@@ -163,7 +163,7 @@ function handleError(err) {
   } else {
     console.log('\n', new Error(err.message).stack);
     console.log('Please report bugs to https://github.com/dtrejo/rotten,'
-      + ' thank you.')
+      + ' thank you. Please be sure that your ulimit is set very high!')
   }
 }
 
