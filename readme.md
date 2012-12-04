@@ -1,7 +1,16 @@
-# Rotten — how rotten is your repo?
-- How many branches have how many commits waiting to get into master?
-- How much code is **rotting** in remote branches, waiting for release?
-- OMG OMG DONT DO THIS PLEASE KEEP YOUR CODE FRESH. RELEASE OFTEN OR DONT CODE!
+# Rotten — find empty git branches and unmerged ones with tons of code!
+
+    $ npm -g install rotten
+
+## It helps you discover
+- Which remote branches are empty (all code is in master), also outputs a command to delete them all.
+- Which remote branches still have lots of code that needs to be merged
+- How long remote branches have been waiting to be merged.
+
+## Why is this useful?
+- discover which projects are languishing
+- discover which engineers are unhappy that their code is not being reviewed/merged
+- discover how effective your development process is
 
 ## How rotten am I really?
 Try it out.
@@ -12,15 +21,7 @@ $ cd my-big-git-repo
 $ rotten
 ```
 
-## Usage
-Simple:
-
-```
-$ cd my-big-git-repo
-$ rotten
-```
-
-Complicated:
+# Usage
 
 ```
 Usage: rotten --repo /path-to-git-repo --prod master
@@ -43,5 +44,5 @@ $ rotten --mostcommits
 
 Explanation:
 
-  - rotten = # branches you need to merge into prod
-  - harvested: branches already in prod that need to be deleted.
+- rotten: number of branches you need to merge into prod
+- harvested: branches already in prod that need to be deleted.
