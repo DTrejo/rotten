@@ -20,6 +20,9 @@ var optimist =
     .describe('c', 'show branches with the most commits first (defaults to'
       + 'showing oldest commits first)')
 
+    .default('keep', false)
+    .describe('keep', 'don\'t run "harvested" checks (if you want to keep merged branches)')
+
     .usage('Usage: $0 --repo /path-to-git-repo --prod master')
 
 var help = optimist.help()
@@ -87,7 +90,7 @@ function main () {
       if (err) handleError(new Error(err.message).stack)
 
       console.log('')
-      if (inprod.length) {
+      if (!argv.keep && inprod.length) {
         inprod = inprod.reverse()
         inprod.forEach(function (info) {
           console.log('  ' + info.branch.green
@@ -106,7 +109,7 @@ function main () {
         console.log(deleteThese)
         console.log()
         console.log()
-      } else {
+      } else if (!argv.keep) {
         console.log('==Congrats, repo is clean; all branches already merged'
           + ' into '.green + prod.magenta + '=='.green)
       }
@@ -140,10 +143,12 @@ function main () {
       }
 
       console.log('#rotten is the number of branches you need to merge to prod')
-      console.log('harvested: branches already in prod that need to be deleted')
+      if (!argv.keep) {
+        console.log('harvested: branches already in prod that need to be deleted')
+      }
       console.log('Please tweet your score! (With the #rotten hashtag :)')
       console.log('  Your rotten score is '
-        + ('#rotten:' + notinprod.length + '/harvested:' + inprod.length).green)
+        + ('#rotten:' + notinprod.length + (argv.keep ? '' : '/harvested:' + inprod.length)).green)
       process.exit(0)
     })
   })
@@ -170,3 +175,4 @@ function handleError(err) {
 if (require.main === module) {
   main()
 }
+
