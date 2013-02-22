@@ -21,7 +21,8 @@ var optimist =
       + 'showing oldest commits first)')
 
     .default('keep', false)
-    .describe('keep', 'don\'t run "harvested" checks (if you want to keep merged branches)')
+    .describe('keep', 'don\'t run "harvested" checks (if you want to keep'
+      + ' merged branches)')
 
     .usage('Usage: $0 --repo /path-to-git-repo --prod master')
 
@@ -36,8 +37,8 @@ var repoDir = path.resolve(__dirname, argv.repo)
 var prod = argv.prod
 
 function git(args, cb) {
-  // args = '--git-dir ' + repoDir + '/.git ' + args;
-  // console.log('git ' + args);
+  // args = '--git-dir ' + repoDir + '/.git ' + args
+  // console.log('git ' + args)
   // return exec([ 'git', args ], cb)
   return exec('git ' + args, { cwd: repoDir }, cb)
 }
@@ -100,7 +101,7 @@ function main () {
         var deleteThese =
           inprod.map(function (info) {
             // take everything after the slash
-            var branchName = info.branch.substr(info.branch.indexOf("/") + 1);
+            var branchName = info.branch.substr(info.branch.indexOf("/") + 1)
             return 'git push origin :' + branchName.red + '; git branch -D '
               + branchName.red + ';'
           })
@@ -160,12 +161,12 @@ process.on('uncaughtException', function (err) {
 
 function handleError(err) {
   if (/spawn Unknown system errno 23/.test(err.message)) {
-    console.log('\n', new Error(err.message).stack);
+    console.log('\n', new Error(err.message).stack)
     console.log('ERROR. Please be sure you\'ve specified a branch that exists.'
       + '\nI have reason to believe that the branch ' + prod.red +' does not'
       + ' exist in this repo.')
   } else {
-    console.log('\n', new Error(err.message).stack);
+    console.log('\n', new Error(err.message).stack)
     console.log('Please report bugs to https://github.com/dtrejo/rotten,'
       + ' thank you. Please be sure that your ulimit is set very high!')
   }
