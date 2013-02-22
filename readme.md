@@ -29,6 +29,7 @@ Usage: rotten --repo /path-to-git-repo --prod master
 Options:
   -r, --repo         the repo youd like to examine for rotting code                                        [default: "."]
   -p, --prod         the branch you have running in production                                             [default: "master"]
+  --keep             don't run "harvested" checks (if you want to keep merged branches)                    [default: false]
   -c, --mostcommits  show branches with the most commits first (defaults to showing oldest commits first)  [default: false]
 ```
 
