@@ -50,7 +50,6 @@ function main () {
     var branches = stdout.split('\n').map(trim).filter(identity)
     var inprod = []
     var notinprod = []
-    var partiallyinprod = []
 
     var prodRegex = new RegExp('/' + prod + '$')
     var dot = 0
