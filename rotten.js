@@ -100,9 +100,11 @@ function main () {
         console.log("==Paste the following to delete them all==".red)
         var deleteThese =
           inprod.map(function (info) {
-            // take everything after the slash
-            var branchName = info.branch.substr(info.branch.indexOf("/") + 1)
-            return 'git push origin :' + branchName.red + '; git branch -D '
+            // split the full branch name into remote and branch
+            branchInfo = info.branch.split("/");
+            var remoteName = branchInfo[0]
+            var branchName = branchInfo[1]
+            return 'git push ' + remoteName.red + ' :' + branchName.red + '; git branch -D '
               + branchName.red + ';'
           })
           .join('\n')
