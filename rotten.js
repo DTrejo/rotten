@@ -102,7 +102,7 @@ function main () {
           inprod.map(function (info) {
             // take everything after the slash
             var branchName = info.branch.substr(info.branch.indexOf("/") + 1)
-            return 'git push origin :' + branchName.red + '; git branch -D '
+            return 'git push origin :refs/heads/' + branchName.red + '; git branch -D '
               + branchName.red + ';'
           })
           .join('\n')
